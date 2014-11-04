@@ -1,10 +1,11 @@
 #!/bin/bash
 
 dir=~/.cpp_creation_file_class/
+config_filename=config.cfg
 
 function createdir {
-  [ -d "./include" ] || mkdir -p ./include;
-  [ -d "./src" ] || mkdir -p ./src;
+    [ -d "./include" ] || mkdir -p ./include;
+    [ -d "./src" ] || mkdir -p ./src;
 }
 
 if [ ! -d $dir ]; then
@@ -13,23 +14,30 @@ if [ ! -d $dir ]; then
 fi
 
 if [ $# -eq 1 ]; then
-  source_file="$dir/template_files/cpp_class"
-  include_file="$dir/template_files/cpp_include"
-  name=`echo $1 | tr "[:upper:]" "[:lower:]"`
-  NAME=`echo $name | tr "[:lower:]" "[:upper:]"`
-  Name=${name^}
+    source_file="$dir/template_files/cpp_class"
+    include_file="$dir/template_files/cpp_include"
+    name=`echo $1 | tr "[:upper:]" "[:lower:]"`
+    NAME=`echo $name | tr "[:lower:]" "[:upper:]"`
+    Name=${name^}
 
-  username="$USER"
-  projectname="${PWD##*/}"
+    if [ -f "$dir/$config_filename" ]; then
+        source "$dir/$config_filename"
+    fi
 
-  createdir;
+    # if username is not define on the configuration file
+    if [[ -z $username ]]; then
+        username="$USER"
+    fi
+    projectname="${PWD##*/}"
 
-  cat $source_file \
-    | sed "s/Name/$Name/g" | sed "s/NAME/$NAME/g" \
-    | sed "s/username/$name/g" | sed "s/projectname/$projectname/g" > src/$name.cpp
-  cat $include_file \
-    | sed "s/Name/$Name/g" | sed "s/NAME/$NAME/g" \
-    | sed "s/username/$username/g" | sed "s/projectname/$projectname/g" > include/$name.hpp
+    createdir;
+
+    cat $source_file \
+        | sed "s/Name/$Name/g" | sed "s/NAME/$NAME/g" \
+        | sed "s/username/$name/g" | sed "s/projectname/$projectname/g" > src/$name.cpp
+    cat $include_file \
+        | sed "s/Name/$Name/g" | sed "s/NAME/$NAME/g" \
+        | sed "s/username/$username/g" | sed "s/projectname/$projectname/g" > include/$name.hpp
 else
     echo "usage: $0 className"
 fi
